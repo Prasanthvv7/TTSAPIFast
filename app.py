@@ -89,4 +89,4 @@ def translate_and_speak():
         return jsonify({"error": "Audio file not found"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5000)
