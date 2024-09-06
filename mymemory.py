@@ -1,21 +1,43 @@
 from deep_translator import MyMemoryTranslator
 import argparse
 
+# Function to split text into chunks of less than 500 characters
+def split_text_into_chunks(text, max_length=500):
+    chunks = []
+    while len(text) > max_length:
+        # Find the nearest space or punctuation mark to avoid cutting words in half
+        split_index = text.rfind(' ', 0, max_length)
+        if split_index == -1:
+            split_index = max_length  # If no space is found, split at max_length
+        chunks.append(text[:split_index])
+        text = text[split_index:]
+    chunks.append(text)  # Append the remaining text as the last chunk
+    return chunks
+
 def translate_file(input_file_path, output_path, target_mymemory_language):
-    # Initialize the MyMemoryTranslator with source language auto-detection and target language as English
+    # Initialize the MyMemoryTranslator with source language as English and target language
     translator = MyMemoryTranslator(target=target_mymemory_language, source='english')
 
-    # Translate the content
-    translated_text = translator.translate_file(input_file_path)
+    # Read the content of the input file
+    with open(input_file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+
+    # Split the text into chunks if it's larger than 500 characters
+    text_chunks = split_text_into_chunks(text)
+
+    # Perform translation on each chunk
+    translated_text = ""
+    for chunk in text_chunks:
+        translated_text += translator.translate(chunk)
 
     # Write the translated content to the output file
     with open(output_path, 'w', encoding='utf-8') as file:
         file.write(translated_text)
 
-    print(f'Translation complete. Translated text by mymemory saved to {output_path}')
+    print(f'Translation complete. Translated text by MyMemory saved to {output_path}')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Translate text from a file to English.")
+    parser = argparse.ArgumentParser(description="Translate text from a file to a target language using MyMemory.")
     parser.add_argument("input_file", help="Path to the input text file.")
     parser.add_argument("output_file", help="Path to the output text file.")
     parser.add_argument("target_mymemory_language", help="Target language for translation (e.g., 'de', 'fr', 'es').")
@@ -23,5 +45,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     translate_file(args.input_file, args.output_file, args.target_mymemory_language)
-
-
