@@ -44,22 +44,22 @@ def translate_and_speak():
 
     ensure_output_dir()
 
-    # Translation using mymemory.py
-    command = f"python mymemory.py {input_file} {output_file} {target_mymemory_language}"
+    # Attempt translation using google.py first
+    command = f"python google.py {input_file} {output_file} {target_language}"
     stderr = run_command(command)
     if "Translation complete" in stderr:
-        print("Translation complete by mymemory.py")
+        print("Translation complete by google.py")
     else:
-        # If mymemory.py fails, try google.py
-        command = f"python google.py {input_file} {output_file} {target_language}"
+        # If google.py fails, try mymemory.py
+        command = f"python mymemory.py {input_file} {output_file} {target_mymemory_language}"
         stderr = run_command(command)
         if "Translation complete" in stderr:
-            print("Translation complete by google.py")
+            print("Translation complete by mymemory.py")
         else:
-            # If google.py fails, try chatgpt.py
+            # If both google.py and mymemory.py fail, try chatgpt.py
             if not api_key:
                 return jsonify({"error": "API key is required for chatgpt.py"}), 400
-            
+
             command = f"python chatgpt.py {input_file} {output_file} {api_key} {target_language}"
             stderr = run_command(command)
             if "Translation complete" in stderr:
@@ -69,7 +69,7 @@ def translate_and_speak():
                 return jsonify({"error": "Translation failed"}), 500
 
     # Text-to-Speech using tts.py
-    command = f"python tts.py --input {output_file} --output {audio_file} --language={tts_language} --gender {tts_gender} --rate={tts_rate} --volume={tts_volume} --pitch={tts_pitch}"
+    command = f"python tts.py --input {output_file} --output {audio_file} --language={tts_language} --gender={tts_gender} --rate={tts_rate} --volume={tts_volume} --pitch={tts_pitch}"
     stderr = run_command(command)
     if "Selected voice" in stderr:
         print("TTS complete")
